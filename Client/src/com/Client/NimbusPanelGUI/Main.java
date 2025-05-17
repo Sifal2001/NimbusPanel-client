@@ -41,9 +41,16 @@ public class Main extends Application {
         primaryStage.getIcons().add(icon);
         
         // Create HomePage instance and set its scene
-        HomePage homePage = new HomePage(primaryStage, favourite_locations);
-        primaryStage.setScene(homePage.createScene());
+//        HomePage homePage = new HomePage(primaryStage, favourite_locations);
+//        primaryStage.setScene(homePage.createScene());
+//        primaryStage.setTitle("NimbusPanel");
+//        primaryStage.show();
+        
+        LoginPage loginPage = new LoginPage(primaryStage);
+        primaryStage.setScene(loginPage.createScene());
         primaryStage.setTitle("NimbusPanel");
+        primaryStage.setMinWidth(900);   
+        primaryStage.setMinHeight(700); 
         primaryStage.show();
     }
     
