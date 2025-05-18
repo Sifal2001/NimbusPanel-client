@@ -46,8 +46,8 @@ public class Main extends Application {
 //        primaryStage.setTitle("NimbusPanel");
 //        primaryStage.show();
         
-        LoginPage loginPage = new LoginPage(primaryStage);
-        primaryStage.setScene(loginPage.createScene());
+        SignUpPage signUpPage = new SignUpPage(primaryStage);
+        primaryStage.setScene(signUpPage.createScene());
         primaryStage.setTitle("NimbusPanel");
         primaryStage.setMinWidth(900);   
         primaryStage.setMinHeight(700); 

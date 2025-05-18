@@ -1,13 +1,7 @@
 package com.Client.NimbusPanelGUI;
 
-import com.Client.CoordResponse.Location;
-import com.Client.CoordResponse.Location.ApiException;
-import com.Client.WeatherCast.WeatherCastController.weatherCallException;
-
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
@@ -15,13 +9,15 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.*;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
-public class LoginPage {
+
+public class SignUpPage {
+	
     private Stage primaryStage;
+    private PasswordField password;
+    private PasswordField passwordConfirm;
     
-    public LoginPage(Stage primaryStage) {
+    public SignUpPage(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
     
@@ -78,11 +74,10 @@ public class LoginPage {
         welcomeContainer.getChildren().add(welcome_label);
         
         VBox startContainer = new VBox();
-        startContainer.setAlignment(Pos.CENTER);
         startContainer.setMaxWidth(400);
         startContainer.setPrefWidth(400);
         
-        Label start_label = new Label("Clouds, sun, rain — all at your fingertips. Log in and stay ahead of the weather");
+        Label start_label = new Label("Clouds, sun, rain — all at your fingertips. Sign up and stay ahead of the weather");
         start_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 20px; -fx-text-fill: Black; -fx-wrap-text: true;");
         start_label.setWrapText(true);
         startContainer.getChildren().add(start_label);
@@ -93,6 +88,21 @@ public class LoginPage {
         VBox formSection = new VBox(15);
         formSection.setAlignment(Pos.CENTER);
 
+        VBox fullNameContainer = new VBox(5);
+        fullNameContainer.setAlignment(Pos.CENTER); // Center the email label and field
+        Label fullName_label = new Label("Full Name");
+        fullName_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 16px; -fx-text-fill: Black;");// Center the label text
+        
+        TextField fullNameField = new TextField();
+        fullNameField.setPromptText("Jhon Doe");
+        fullNameField.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
+                + "-fx-border-width: 0 0 1 0; -fx-background-color: transparent; "
+                + "-fx-alignment: center;"); // Center the text inside the field
+        fullNameField.setPrefWidth(400);
+        fullNameField.setMaxWidth(400);
+        
+        fullNameContainer.getChildren().addAll(fullName_label, fullNameField);
+        
         // Email field container
         VBox emailContainer = new VBox(5);
         emailContainer.setAlignment(Pos.CENTER); // Center the email label and field
@@ -116,18 +126,34 @@ public class LoginPage {
         password_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 16px; -fx-text-fill: Black;");
         password_label.setAlignment(Pos.CENTER); // Center the label text
 
-        PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("********");
-        passwordField.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
+        password = new PasswordField();
+        password.setPromptText("********");
+        password.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
                 + "-fx-border-width: 0 0 1 0; -fx-background-color: transparent; "
                 + "-fx-alignment: center;"); // Center the text inside the field
-        passwordField.setPrefWidth(400);
-        passwordField.setMaxWidth(400);
+        password.setPrefWidth(400);
+        password.setMaxWidth(400);
 
-        passwordContainer.getChildren().addAll(password_label, passwordField);
+        passwordContainer.getChildren().addAll(password_label, password);
+        
+        VBox passwordConfirmContainer = new VBox(5);
+        passwordConfirmContainer.setAlignment(Pos.CENTER); // Center the password label and field
+        Label passwordConfirm_label = new Label("Confirm password");
+        passwordConfirm_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 16px; -fx-text-fill: Black;");
+        passwordConfirm_label.setAlignment(Pos.CENTER); // Center the label text
+
+        passwordConfirm = new PasswordField();
+        passwordConfirm.setPromptText("********");
+        passwordConfirm.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
+                + "-fx-border-width: 0 0 1 0; -fx-background-color: transparent; "
+                + "-fx-alignment: center;"); // Center the text inside the field
+        passwordConfirm.setPrefWidth(400);
+        passwordConfirm.setMaxWidth(400);
+        
+        passwordConfirmContainer.getChildren().addAll(passwordConfirm_label, passwordConfirm);
 
         // Set alignment for the entire form section
-        formSection.getChildren().addAll(emailContainer, passwordContainer);
+        formSection.getChildren().addAll(fullNameContainer , emailContainer, passwordContainer, passwordConfirmContainer);
         formSection.setAlignment(Pos.CENTER);
         
         // Buttons section
@@ -135,9 +161,14 @@ public class LoginPage {
         buttonSection.setAlignment(Pos.CENTER);
         VBox.setMargin(buttonSection, new Insets(20, 0, 0, 0));
         
-        Button loginButton = new Button("Log in");
-        loginButton.setStyle("-fx-background-color: STEELBLUE; -fx-border-color: transparent; -fx-cursor: hand; -fx-font-size: 20px; -fx-text-fill: white;");
-        loginButton.setPrefSize(400, 24);
+        Button signUpButton = new Button("Sign Up");
+        signUpButton.setStyle("-fx-background-color: STEELBLUE; -fx-border-color: transparent; -fx-cursor: hand; -fx-font-size: 20px; -fx-text-fill: white;");
+        signUpButton.setPrefSize(400, 24);
+        
+        signUpButton.setOnAction(event -> handleLogin(
+        	password.getText(),
+        	passwordConfirm.getText()
+        ));
         
         HBox orRow = new HBox(10);
         orRow.setAlignment(Pos.CENTER);
@@ -166,17 +197,18 @@ public class LoginPage {
         orContainer.setPadding(new Insets(10, 0, 10, 0)); 
         
         
-        Button signUpButton = new Button("Sign Up");
-        signUpButton.setStyle("-fx-background-color: STEELBLUE; -fx-border-color: transparent; -fx-cursor: hand; -fx-font-size: 20px; -fx-text-fill: white;");
-        signUpButton.setPrefSize(400, 24);
+        Button backButton = new Button("Back");
+        backButton.setStyle("-fx-background-color: STEELBLUE; -fx-border-color: transparent; -fx-cursor: hand; -fx-font-size: 20px; -fx-text-fill: white;");
+        backButton.setPrefSize(400, 24);
         
-        signUpButton.setOnAction(event -> {
-            SignUpPage signUpPage = new SignUpPage(primaryStage);
-            primaryStage.setScene(signUpPage.createScene());
+        backButton.setOnAction(event -> {
+            LoginPage loginPage = new LoginPage(primaryStage);
+            primaryStage.setScene(loginPage.createScene());
         });
         
+        
        
-        buttonSection.getChildren().addAll(loginButton, orContainer, signUpButton);
+        buttonSection.getChildren().addAll(signUpButton, orContainer, backButton);
         
 
         
@@ -214,6 +246,28 @@ public class LoginPage {
         Region spacer = new Region();
         spacer.setPrefWidth(width);
         return spacer;
+    }
+    
+    private void handleLogin(String password, String passwordConfirm) {
+        String validationError = validatePasswords(password, passwordConfirm);
+        if (validationError != null) {
+            System.out.println(validationError);
+            return;
+        }
+        
+        System.out.println("Password match");
+    }
+
+    private String validatePasswords(String password, String passwordConfirm) {
+        if (password.isEmpty()) {
+            return "Please enter a password";
+        }
+        
+        if (passwordConfirm.isEmpty()) {
+            return "Please confirm your password";
+        }
+        
+        return password.equals(passwordConfirm) ? null : "Password does not match";
     }
     
 //    private void apiCallErrorPopUp(Stage ownerStage) {
