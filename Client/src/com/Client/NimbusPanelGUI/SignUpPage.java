@@ -1,5 +1,8 @@
 package com.Client.NimbusPanelGUI;
 
+import com.Client.User.UserService;
+import java.net.HttpURLConnection;
+import com.Client.User.CreateUser;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,8 +17,13 @@ import javafx.stage.*;
 public class SignUpPage {
 	
     private Stage primaryStage;
-    private PasswordField password;
-    private PasswordField passwordConfirm;
+    private TextField firstNameField;
+    private TextField lastNameField;
+    private TextField emailField;
+    private PasswordField passwordField;
+    private PasswordField passwordConfirmField;
+    
+    private UserService userService = new UserService();
     
     public SignUpPage(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -27,33 +35,33 @@ public class SignUpPage {
     
     private Scene createLandingScene() {
 
-        Image app_logo = new Image("file:///C:/Users/Usuario/Desktop/Sifal/WeatherApp/Client/img/app-logo.png");
-        ImageView app_logo_view = new ImageView(app_logo);
-        app_logo_view.setFitWidth(200);
-        app_logo_view.setFitHeight(200);
-        
-        Image landing_background_img = new Image("file:///C:/Users/Usuario/Desktop/Sifal/WeatherApp/Client/img/bg.jpg");
-        
-        BackgroundImage landing_bg_image = new BackgroundImage(
-            landing_background_img,
+    	Image appLogo = new Image("file:img/app-logo.png");
+
+        ImageView appLogoView = new ImageView(appLogo);
+        appLogoView.setFitWidth(200);
+        appLogoView.setFitHeight(200);
+       
+        Image landingBackgroundImg = new Image("file:img/bg.jpg");
+        BackgroundImage landingBgImage = new BackgroundImage(
+            landingBackgroundImg,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
             BackgroundPosition.CENTER,
             new BackgroundSize(100, 100, true, true, false, true)
         );
-        Background landing_background = new Background(landing_bg_image);
+        Background landingBackground = new Background(landingBgImage);
         
-        HBox landing_vbox = new HBox();
-        landing_vbox.setPrefSize(1200, 680);
-        landing_vbox.setMinSize(900, 600);
+        HBox mainLayout = new HBox();
+        mainLayout.setPrefSize(1200, 680);
+        mainLayout.setMinSize(900, 600);
         
         // Main content VBox
-        VBox loginContent = new VBox(20);
+        VBox loginContent = new VBox(10);
         loginContent.setAlignment(Pos.TOP_CENTER);
         loginContent.setPadding(new Insets(10));
         VBox.setVgrow(loginContent, Priority.ALWAYS);
-        loginContent.prefWidthProperty().bind(landing_vbox.widthProperty().multiply(0.4));
-        loginContent.prefHeightProperty().bind(landing_vbox.heightProperty());
+        loginContent.prefWidthProperty().bind(mainLayout.widthProperty().multiply(0.4));
+        loginContent.prefHeightProperty().bind(mainLayout.heightProperty());
         
         VBox welcomeContainer = new VBox();
         welcomeContainer.setAlignment(Pos.TOP_CENTER);
@@ -68,92 +76,63 @@ public class SignUpPage {
         headerSection.setPrefWidth(400);
         
         
-        Label welcome_label = new Label("Welcome to NimbusPanel");
-        welcome_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 32px; -fx-text-fill: Black; -fx-font-weight: bold; -fx-wrap-text: true;");
-        welcome_label.setWrapText(true);
-        welcomeContainer.getChildren().add(welcome_label);
+        Label welcomeLabel = new Label("Welcome to NimbusPanel");
+        welcomeLabel.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 32px; -fx-text-fill: Black; -fx-font-weight: bold; -fx-wrap-text: true;");
+        welcomeLabel.setWrapText(true);
+        welcomeContainer.getChildren().add(welcomeLabel);
         
         VBox startContainer = new VBox();
         startContainer.setMaxWidth(400);
         startContainer.setPrefWidth(400);
         
-        Label start_label = new Label("Clouds, sun, rain — all at your fingertips. Sign up and stay ahead of the weather");
-        start_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 20px; -fx-text-fill: Black; -fx-wrap-text: true;");
-        start_label.setWrapText(true);
-        startContainer.getChildren().add(start_label);
+        Label startLabel = new Label("Clouds, sun, rain — all at your fingertips. Sign up and stay ahead of the weather");
+        startLabel.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 20px; -fx-text-fill: Black; -fx-wrap-text: true;");
+        startLabel.setWrapText(true);
+        startContainer.getChildren().add(startLabel);
         
         headerSection.getChildren().addAll(welcomeContainer, startContainer);
         
         // Form section
-        VBox formSection = new VBox(15);
+        VBox formSection = new VBox(10);
         formSection.setAlignment(Pos.CENTER);
-
-        VBox fullNameContainer = new VBox(5);
-        fullNameContainer.setAlignment(Pos.CENTER); // Center the email label and field
-        Label fullName_label = new Label("Full Name");
-        fullName_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 16px; -fx-text-fill: Black;");// Center the label text
         
-        TextField fullNameField = new TextField();
-        fullNameField.setPromptText("Jhon Doe");
-        fullNameField.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
-                + "-fx-border-width: 0 0 1 0; -fx-background-color: transparent; "
-                + "-fx-alignment: center;"); // Center the text inside the field
-        fullNameField.setPrefWidth(400);
-        fullNameField.setMaxWidth(400);
+        HBox nameContainer = new HBox();
+        nameContainer.setPrefWidth(400);
+        nameContainer.setMaxWidth(400);
         
-        fullNameContainer.getChildren().addAll(fullName_label, fullNameField);
+        // FirstName field container  
+        firstNameField = new TextField();
+        firstNameField.setPromptText("John");
+        VBox firstNameContainer = UiComponents.createFormField("First Name", firstNameField, 190);
         
-        // Email field container
-        VBox emailContainer = new VBox(5);
-        emailContainer.setAlignment(Pos.CENTER); // Center the email label and field
-        Label email_label = new Label("Email");
-        email_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 16px; -fx-text-fill: Black;");// Center the label text
-
-        TextField emailField = new TextField();
-        emailField.setPromptText("JhonDoe@email.com");
-        emailField.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
-                + "-fx-border-width: 0 0 1 0; -fx-background-color: transparent; "
-                + "-fx-alignment: center;"); // Center the text inside the field
-        emailField.setPrefWidth(400);
-        emailField.setMaxWidth(400);
-
-        emailContainer.getChildren().addAll(email_label, emailField);
-
-        // Password field container
-        VBox passwordContainer = new VBox(5);
-        passwordContainer.setAlignment(Pos.CENTER); // Center the password label and field
-        Label password_label = new Label("Password");
-        password_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 16px; -fx-text-fill: Black;");
-        password_label.setAlignment(Pos.CENTER); // Center the label text
-
-        password = new PasswordField();
-        password.setPromptText("********");
-        password.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
-                + "-fx-border-width: 0 0 1 0; -fx-background-color: transparent; "
-                + "-fx-alignment: center;"); // Center the text inside the field
-        password.setPrefWidth(400);
-        password.setMaxWidth(400);
-
-        passwordContainer.getChildren().addAll(password_label, password);
+        // LastName field container  
+        lastNameField = new TextField();
+        lastNameField.setPromptText("Doe");
+        VBox lastNameContainer = UiComponents.createFormField("Last Name", lastNameField, 190);
         
-        VBox passwordConfirmContainer = new VBox(5);
-        passwordConfirmContainer.setAlignment(Pos.CENTER); // Center the password label and field
-        Label passwordConfirm_label = new Label("Confirm password");
-        passwordConfirm_label.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 16px; -fx-text-fill: Black;");
-        passwordConfirm_label.setAlignment(Pos.CENTER); // Center the label text
-
-        passwordConfirm = new PasswordField();
-        passwordConfirm.setPromptText("********");
-        passwordConfirm.setStyle("-fx-font-size: 16px; -fx-border-color: transparent transparent black transparent; "
-                + "-fx-border-width: 0 0 1 0; -fx-background-color: transparent; "
-                + "-fx-alignment: center;"); // Center the text inside the field
-        passwordConfirm.setPrefWidth(400);
-        passwordConfirm.setMaxWidth(400);
+        Region spacer = new Region();
+        spacer.setPrefWidth(40);
+        spacer.setMinWidth(40);
+    
+        nameContainer.getChildren().addAll(firstNameContainer, spacer, lastNameContainer);
         
-        passwordConfirmContainer.getChildren().addAll(passwordConfirm_label, passwordConfirm);
+        // Email field container     
+        emailField = new TextField();
+        emailField.setPromptText("JohnDoe@email.com");
+        VBox emailContainer = UiComponents.createFormField("Email", emailField, 400);
+
+        // Password field container  
+        passwordField = new PasswordField();
+        passwordField.setPromptText("********");
+        VBox passwordContainer = UiComponents.createFormField("Password", passwordField, 400);
+        
+        // PasswordConfirm field container
+        passwordConfirmField = new PasswordField();
+        passwordConfirmField.setPromptText("********");
+        VBox passwordConfirmContainer = UiComponents.createFormField("Confirm Password", passwordConfirmField, 400);
 
         // Set alignment for the entire form section
-        formSection.getChildren().addAll(fullNameContainer , emailContainer, passwordContainer, passwordConfirmContainer);
+        formSection.getChildren().addAll(nameContainer, emailContainer, passwordContainer, passwordConfirmContainer);
         formSection.setAlignment(Pos.CENTER);
         
         // Buttons section
@@ -161,14 +140,11 @@ public class SignUpPage {
         buttonSection.setAlignment(Pos.CENTER);
         VBox.setMargin(buttonSection, new Insets(20, 0, 0, 0));
         
-        Button signUpButton = new Button("Sign Up");
-        signUpButton.setStyle("-fx-background-color: STEELBLUE; -fx-border-color: transparent; -fx-cursor: hand; -fx-font-size: 20px; -fx-text-fill: white;");
+        Button signUpButton = new Button("Confirm");
+        signUpButton.setStyle(UiComponents.BUTTON_STYLE);
         signUpButton.setPrefSize(400, 24);
         
-        signUpButton.setOnAction(event -> handleLogin(
-        	password.getText(),
-        	passwordConfirm.getText()
-        ));
+        signUpButton.setOnAction(event -> handleSignUp());
         
         HBox orRow = new HBox(10);
         orRow.setAlignment(Pos.CENTER);
@@ -198,7 +174,7 @@ public class SignUpPage {
         
         
         Button backButton = new Button("Back");
-        backButton.setStyle("-fx-background-color: STEELBLUE; -fx-border-color: transparent; -fx-cursor: hand; -fx-font-size: 20px; -fx-text-fill: white;");
+        backButton.setStyle(UiComponents.BUTTON_STYLE);
         backButton.setPrefSize(400, 24);
         
         backButton.setOnAction(event -> {
@@ -228,36 +204,49 @@ public class SignUpPage {
         );
         
         // Logo section
-        VBox request_hbox = new VBox(60);
-        request_hbox.setBackground(landing_background);
-        request_hbox.setPrefSize(1200, 450);
-        request_hbox.getChildren().addAll(app_logo_view);
-        request_hbox.setAlignment(Pos.CENTER);
-        request_hbox.prefHeightProperty().bind(landing_vbox.heightProperty());
-        request_hbox.prefWidthProperty().bind(landing_vbox.widthProperty().multiply(0.6));
+        VBox logoSection = new VBox();
+        logoSection.setBackground(landingBackground);
+        logoSection.setPrefSize(720, 450);
+        logoSection.getChildren().addAll(appLogoView);
+        logoSection.setAlignment(Pos.CENTER);
+        logoSection.prefHeightProperty().bind(mainLayout.heightProperty());
+//        logoSection.prefWidthProperty().bind(mainLayout.widthProperty().multiply(0.6));
         
         // Add everything to the main container
-        landing_vbox.getChildren().addAll(loginContent, request_hbox);
+        mainLayout.getChildren().addAll(loginContent, logoSection);
         
-        return new Scene(landing_vbox, 1200, 680);
+        return new Scene(mainLayout, 1200, 680);
     }
     
-    private Region createSpacer(double width) {
-        Region spacer = new Region();
-        spacer.setPrefWidth(width);
-        return spacer;
-    }
-    
-    private void handleLogin(String password, String passwordConfirm) {
-        String validationError = validatePasswords(password, passwordConfirm);
-        if (validationError != null) {
-            System.out.println(validationError);
-            return;
-        }
-        
-        System.out.println("Password match");
-    }
+    private boolean validateForm(String firstName, String lastName, String email, String password, String passwordConfirm) {
+        String firstNameError  = isValidFirstName(firstName);
+        String lastNameError   = isValidLastName(lastName);
+        String passwordError   = validatePasswords(password, passwordConfirm);
+        boolean emailValid     = validateEmail(email);
 
+        if (firstNameError != null) {
+            ApiCallErrorPopUp.showErrorPopUp(primaryStage, firstNameError, PopUpMessages.SERVER_ERROR_TITLE);
+            return false;
+        }
+
+        if (lastNameError != null) {
+            ApiCallErrorPopUp.showErrorPopUp(primaryStage, lastNameError, PopUpMessages.SERVER_ERROR_TITLE);
+            return false;
+        }
+
+        if (!emailValid) {
+            ApiCallErrorPopUp.showErrorPopUp(primaryStage, "Please use a valid email", PopUpMessages.SERVER_ERROR_TITLE);
+            return false;
+        }
+
+        if (passwordError != null) {
+            ApiCallErrorPopUp.showErrorPopUp(primaryStage, passwordError, PopUpMessages.SERVER_ERROR_TITLE);
+            return false;
+        }
+
+        return true;
+    }
+    
     private String validatePasswords(String password, String passwordConfirm) {
         if (password.isEmpty()) {
             return "Please enter a password";
@@ -267,27 +256,62 @@ public class SignUpPage {
             return "Please confirm your password";
         }
         
+        if(password.length() < 8) {
+        	return "Please enter a password with at least 8 characters";
+        }
+        
         return password.equals(passwordConfirm) ? null : "Password does not match";
     }
     
-//    private void apiCallErrorPopUp(Stage ownerStage) {
-//        Stage popupStage = new Stage();
-//        popupStage.initModality(Modality.WINDOW_MODAL);
-//        popupStage.initOwner(ownerStage);
-//        
-//        Label label = new Label("The Location you have entered cannot be found");
-//        
-//        Button close_button = new Button("Close");
-//        close_button.setPrefSize(80, 28);
-//        close_button.setOnAction(event -> popupStage.close());
-//        
-//        VBox popupContent = new VBox(label, close_button);
-//        popupContent.setSpacing(20);
-//        popupContent.setStyle("-fx-padding: 10; -fx-alignment: center;");
-//        
-//        Scene popupScene = new Scene(popupContent, 400, 200);
-//        popupStage.setScene(popupScene);
-//        popupStage.setTitle("Warning");
-//        popupStage.show();
-//    }
+    private boolean validateEmail(String email) {
+    	return email != null && email.matches("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
+    	
+    }
+    
+    private String isValidFirstName(String firstName) {
+    	if (firstName == null || firstName.trim().isEmpty()) {
+    		return "First Name is required";
+    	}
+    	if (!firstName.matches("[a-zA-Z]*")) {
+    		return "First name must only contain letters";
+    	}
+    	
+    	return null;
+    }
+    
+    private String isValidLastName(String lastName) {
+    	if (lastName == null || lastName.trim().isEmpty()) {
+    		return "Last Name is required";
+    	}
+    	if (!lastName.matches("[a-zA-Z]*")) {
+    		return "Last name must only contain letters";
+    	}
+    	
+    	return null;
+    }
+    
+    private void handleSignUp() {
+        String firstName = firstNameField.getText();
+        String lastName  = lastNameField.getText();
+        String email     = emailField.getText();
+        String password  = passwordField.getText();
+        String confirm   = passwordConfirmField.getText();
+
+        if (!validateForm(firstName, lastName, email, password, confirm)) return;
+
+        if (userService.isEmailDuplicate(email)) {
+            ApiCallErrorPopUp.showErrorPopUp(primaryStage,
+                PopUpMessages.DUPLICATE_EMAIL_MESSAGE, PopUpMessages.SERVER_ERROR_TITLE);
+            return;
+        }
+
+        try {
+            CreateUser.CreateUserResponse response = userService.createUser(firstName, lastName, email, password);
+            if (response.code == HttpURLConnection.HTTP_OK || response.code == HttpURLConnection.HTTP_CREATED) {
+                primaryStage.setScene(new HomePage(primaryStage, Main.favouriteLocations).createScene());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

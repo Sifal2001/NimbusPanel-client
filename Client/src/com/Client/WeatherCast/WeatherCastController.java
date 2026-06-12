@@ -42,6 +42,7 @@ public class WeatherCastController {
             /*
              * Get Current weather data from json 
              */
+            Main.timeZoneOffset = responseArray.getTimeZoneOffset();
             CurrentCast currentWeather = responseArray.getCurrent();
             Main.current_temp = currentWeather.getTemp();
             Main.current_humidity = currentWeather.getHumidity();

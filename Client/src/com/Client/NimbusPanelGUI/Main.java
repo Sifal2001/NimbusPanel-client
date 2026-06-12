@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public class Main extends Application {
     public static String location;
+    public static int timeZoneOffset;
     
     // Weather data static variables
     public static double[] hourly_temp = new double[24];
@@ -26,28 +27,28 @@ public class Main extends Application {
     public static long current_sunset_timestamp;
     public static long current_time_timestamp;
     
-    public static ArrayList<String> favourite_locations = new ArrayList<>();
+    public static ArrayList<String> favouriteLocations = new ArrayList<>();
     
     @Override
     public void start(Stage primaryStage) {
         // Initialize favorite locations in Main instead of HomePage
-        favourite_locations.add("London");
-        favourite_locations.add("Bejaia");
-        favourite_locations.add("Miami");
-        favourite_locations.add("testestestestest");
+        favouriteLocations.add("London");
+        favouriteLocations.add("Bejaia");
+        favouriteLocations.add("Miami");
+        favouriteLocations.add("testestestestest");
         
         // Set up the stage
-        Image icon = new Image("file:///C:/Users/Usuario/Desktop/Sifal/WeatherApp/Client/img/app-logo-32.png");
+        Image icon = new Image("file:img/app-logo-32.png");
         primaryStage.getIcons().add(icon);
         
         // Create HomePage instance and set its scene
-//        HomePage homePage = new HomePage(primaryStage, favourite_locations);
+//        HomePage homePage = new HomePage(primaryStage, favouriteLocations);
 //        primaryStage.setScene(homePage.createScene());
 //        primaryStage.setTitle("NimbusPanel");
 //        primaryStage.show();
         
-        SignUpPage signUpPage = new SignUpPage(primaryStage);
-        primaryStage.setScene(signUpPage.createScene());
+        LoginPage loginPage = new LoginPage(primaryStage);
+        primaryStage.setScene(loginPage.createScene());
         primaryStage.setTitle("NimbusPanel");
         primaryStage.setMinWidth(900);   
         primaryStage.setMinHeight(700); 
