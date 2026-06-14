@@ -13,6 +13,7 @@ import javafx.stage.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import javafx.concurrent.Task;
 
 public class HomePage {
     private Stage primaryStage;
@@ -231,18 +232,56 @@ public class HomePage {
     }
     
     private void openWeatherPage(String cityName) {
-        try {
-            Main.location = Main.capitalizeFirstLetter(cityName);
-            Location.GetLocation(new String[]{}, Main.formatLocationInput(Main.location));
+        // Prepare the location name on the UI thread — this part is instant,
+        // no network, so it's fine to do here before going background
+        Main.location = Main.capitalizeFirstLetter(cityName);
+
+        // A Task<Void> is a unit of background work. <Void> is the generic type
+        // saying "this task doesn't RETURN a value" — it just does work (the
+        // navigation happens in the success hook, not as a return value).
+        // We build it from an anonymous class: 'new Task<Void>() { ... }' creates
+        // a one-off object that overrides call() with what we want done
+        Task<Void> loadWeatherTask = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                // THIS runs on a BACKGROUND thread — the slow network call lives
+                // here, off the UI thread, so the window stays responsive.
+                // If GetLocation throws, the Task catches it automatically and
+                // routes it to setOnFailed below — no try/catch needed here
+                Location.GetLocation(new String[]{}, Main.formatLocationInput(Main.location));
+                return null;   // Void's required "I return nothing" return
+            }
+        };
+
+        // setOnSucceeded runs AUTOMATICALLY and ON THE UI THREAD when call()
+        // finishes without throwing. So touching the scene here is legal —
+        // this is the safe "hand back to the UI thread" half of the dance.
+        // 'event ->' is a lambda; the event param is unused but required by the signature
+        loadWeatherTask.setOnSucceeded(event -> {
             WeatherPage weatherPage = new WeatherPage(primaryStage);
             primaryStage.setScene(weatherPage.createScene());
+        });
 
-        } catch (ApiException | weatherCallException | IOException ex) {
+        // setOnFailed runs (also on the UI thread) if call() threw anything.
+        // getException() returns the Throwable that was thrown — useful if you
+        // later want to show different popups for different failures
+        loadWeatherTask.setOnFailed(event -> {
+        	Throwable cause = loadWeatherTask.getException();
+            // For now both paths show the same popup, but this structure lets you
+            // give a real "server is down" message later instead of blaming the city.
+            // printStackTrace keeps the technical detail in your console for debugging
+            if (cause != null) {
+                cause.printStackTrace();
+            }
             ApiCallErrorPopUp.showErrorPopUp(primaryStage,
                 PopUpMessages.LOCATION_NOT_FOUND_MESSAGE,
                 PopUpMessages.LOCATION_NOT_FOUND_TITLE);
-        } catch (URISyntaxException ex) {
-            ex.printStackTrace();
-        }
+        });
+
+        // Nothing has run yet — we only DEFINED the task and its hooks.
+        // A Thread is the actual worker; we hand it the task and start() it.
+        // 'new Thread(task)' wraps the work, start() launches it in the background
+        // and immediately returns control here, so the UI thread flows on, free
+        new Thread(loadWeatherTask).start();
     }
 }
