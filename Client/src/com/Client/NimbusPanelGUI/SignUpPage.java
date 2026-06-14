@@ -219,10 +219,10 @@ public class SignUpPage {
     }
     
     private boolean validateForm(String firstName, String lastName, String email, String password, String passwordConfirm) {
-        String firstNameError  = isValidFirstName(firstName);
-        String lastNameError   = isValidLastName(lastName);
-        String passwordError   = validatePasswords(password, passwordConfirm);
-        boolean emailValid     = validateEmail(email);
+        String firstNameError = InputValidator.validateFirstName(firstName);
+        String lastNameError  = InputValidator.validateLastName(lastName);
+        String passwordError  = InputValidator.validatePasswords(password, passwordConfirm);
+        boolean emailValid    = InputValidator.isValidEmail(email);
 
         if (firstNameError != null) {
             ApiCallErrorPopUp.showErrorPopUp(primaryStage, firstNameError, PopUpMessages.SERVER_ERROR_TITLE);
@@ -261,22 +261,6 @@ public class SignUpPage {
         }
         
         return password.equals(passwordConfirm) ? null : "Password does not match";
-    }
-    
-    private boolean validateEmail(String email) {
-    	return email != null && email.matches("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
-    	
-    }
-    
-    private String isValidFirstName(String firstName) {
-    	if (firstName == null || firstName.trim().isEmpty()) {
-    		return "First Name is required";
-    	}
-    	if (!firstName.matches("[a-zA-Z]*")) {
-    		return "First name must only contain letters";
-    	}
-    	
-    	return null;
     }
     
     private String isValidLastName(String lastName) {

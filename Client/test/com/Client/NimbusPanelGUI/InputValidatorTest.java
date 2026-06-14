@@ -40,4 +40,27 @@ class InputValidatorTest {
         assertEquals("First name must only contain letters",
                      InputValidator.validateFirstName("John123"));
     }
+    
+    @Test
+    void matchingValidPasswords_returnNull() {
+        assertNull(InputValidator.validatePasswords("password123", "password123"));
+    }
+
+    @Test
+    void shortPassword_returnsLengthError() {
+        assertEquals("Please enter a password with at least 8 characters",
+                     InputValidator.validatePasswords("short", "short"));
+    }
+
+    @Test
+    void mismatchedPasswords_returnMismatchError() {
+        assertEquals("Password does not match",
+                     InputValidator.validatePasswords("password123", "password999"));
+    }
+
+    @Test
+    void emptyPassword_returnsEnterError() {
+        assertEquals("Please enter a password",
+                     InputValidator.validatePasswords("", ""));
+    }
 }
