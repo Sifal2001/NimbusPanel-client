@@ -3,11 +3,23 @@ package com.Client.User;
 import java.util.List;
 
 public class User {
+	private Long id;
 	private String firstName;
 	private String lastName;
 	private String email;
 	private String password;
 	private List<FavouriteLocations> favouriteLocations;
+	
+	public User(Long id, String firstName, String lastName, String email, String password,
+			List<FavouriteLocations> favouriteLocations) {
+		super();
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.password = password;
+		this.favouriteLocations = favouriteLocations;
+	}
 	
 	public User(String firstName, String lastName, String email, String password,
 			List<FavouriteLocations> favouriteLocations) {
@@ -17,6 +29,14 @@ public class User {
 		this.email = email;
 		this.password = password;
 		this.favouriteLocations = favouriteLocations;
+	}
+	
+	public Long getId() {
+		return id;
+	}
+	
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
 	public String getFirstName() {
@@ -61,7 +81,7 @@ public class User {
 	
 	@Override
 	public String toString() {
-		return "User [firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", password=" + password
+		return "User [id=" + id + " firstName=" + firstName + ", lastName=" + lastName + ", email=" + email + ", password=" + password
 				+ ", favouriteLocations=" + favouriteLocations + "]";
 	}
 

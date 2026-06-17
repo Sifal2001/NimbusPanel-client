@@ -1,7 +1,8 @@
 package com.Client.NimbusPanelGUI;
 
 import com.Client.User.AuthenticateUser;
-import javafx.application.Platform;
+import com.Client.User.User;
+import com.google.gson.Gson;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -169,106 +170,59 @@ public class LoginPage {
 	}
 
 	private void handleLogin() {
-	    String email = emailField.getText();
-	    String password = passwordField.getText();
+		String email = emailField.getText();
+		String password = passwordField.getText();
 
-	    Task<Void> loadUserTask = new Task<>() {
-	        @Override
-	        protected Void call() throws Exception {
-	            // Background thread. We don't need to keep the response here —
-	            // if credentials are bad, authenticateUser THROWS ApiException
-	            // (carrying the HTTP status), which the Task routes to setOnFailed.
-	            // Reaching the end without throwing = success
-	            AuthenticateUser.authenticateUser(email, password);
-	            return null;
-	        }
-	    };
+		Task<String> loadUserTask = new Task<>() {
+			@Override
+			protected String call() throws Exception {
 
-	    loadUserTask.setOnSucceeded(event -> {
-	        // Runs on the UI thread — safe to swap the scene.
-	        // favouriteLocations is the instance field after the Option B refactor
-	        HomePage homePage = new HomePage(primaryStage, Main.favouriteLocations);
-	        primaryStage.setScene(homePage.createScene());
-	    });
+				AuthenticateUser.AuthenticateUserResponse loginResp = AuthenticateUser.authenticateUser(email,
+						password);
 
-	    loadUserTask.setOnFailed(event -> {
-	        // Note: loadUserTask, not loadWeatherTask — this is the login task
-	        Throwable cause = loadUserTask.getException();
+				return loginResp.body;
+			}
+		};
 
-	        String errorMessage;
-	        String errorTitle;
+		loadUserTask.setOnSucceeded(event -> {
 
-	        // Is the failure specifically an authentication ApiException? If so,
-	        // we can read its statusCode to tell WHY it failed. We cast to the
-	        // type after instanceof confirms it, so .statusCode is accessible
-	        if (cause instanceof AuthenticateUser.ApiException) {
-	            AuthenticateUser.ApiException apiEx = (AuthenticateUser.ApiException) cause;
+			String body = loadUserTask.getValue();
 
-	            if (apiEx.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-	                errorMessage = PopUpMessages.LOGIN_FAILED_MESSAGE;   // 401 → wrong credentials
-	                errorTitle = PopUpMessages.LOGIN_FAILED_TITLE;
-	            } else if (apiEx.statusCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-	                errorMessage = PopUpMessages.SERVER_ERROR_MESSAGE;   // 500 → server problem
-	                errorTitle = PopUpMessages.SERVER_ERROR_TITLE;
-	            } else {
-	                errorMessage = "An unexpected error has occurred. Please contact customer service if it persists.";
-	                errorTitle = "Error";
-	            }
-	        } else {
-	            // Anything that isn't an ApiException (network down, etc.) —
-	            // log it for debugging and show a generic message
-	            if (cause != null) cause.printStackTrace();
-	            errorMessage = "An unexpected error has occurred. Please contact customer service if it persists.";
-	            errorTitle = "Error";
-	        }
+			Main.currentUser = new Gson().fromJson(body, User.class);
 
-	        ApiCallErrorPopUp.showErrorPopUp(primaryStage, errorMessage, errorTitle);
-	    });
+			HomePage homePage = new HomePage(primaryStage);
+			primaryStage.setScene(homePage.createScene());
+		});
 
-	    new Thread(loadUserTask).start();
+		loadUserTask.setOnFailed(event -> {
+			Throwable cause = loadUserTask.getException();
+
+			String errorMessage;
+			String errorTitle;
+
+			if (cause instanceof AuthenticateUser.ApiException) {
+				AuthenticateUser.ApiException apiEx = (AuthenticateUser.ApiException) cause;
+
+				if (apiEx.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+					errorMessage = PopUpMessages.LOGIN_FAILED_MESSAGE;
+					errorTitle = PopUpMessages.LOGIN_FAILED_TITLE;
+				} else if (apiEx.statusCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
+					errorMessage = PopUpMessages.SERVER_ERROR_MESSAGE;
+					errorTitle = PopUpMessages.SERVER_ERROR_TITLE;
+				} else {
+					errorMessage = "An unexpected error has occurred. Please contact customer service if it persists.";
+					errorTitle = "Error";
+				}
+			} else {
+				if (cause != null)
+					cause.printStackTrace();
+				errorMessage = "An unexpected error has occurred. Please contact customer service if it persists.";
+				errorTitle = "Error";
+			}
+
+			ApiCallErrorPopUp.showErrorPopUp(primaryStage, errorMessage, errorTitle);
+		});
+
+		new Thread(loadUserTask).start();
 	}
-
-	/*
-	 * private void handleLogin() { String email = emailField.getText(); String
-	 * password = passwordField.getText();
-	 * 
-	 * try {
-	 * 
-	 * AuthenticateUser.AuthenticateUserResponse loginResp =
-	 * AuthenticateUser.authenticateUser(email, password);
-	 * 
-	 * if (loginResp.code == HttpURLConnection.HTTP_OK) {
-	 * 
-	 * Task<Void> loasUser = new Task<>() {
-	 * 
-	 * @Override protected Void call() throws Exception{ Main.favouriteLocations }
-	 * };
-	 * 
-	 * 
-	 * Platform.runLater(() -> { HomePage homePage = new HomePage(primaryStage,
-	 * Main.favouriteLocations); primaryStage.setScene(homePage.createScene()); });
-	 * 
-	 * }
-	 * 
-	 * } catch (AuthenticateUser.ApiException e) {
-	 * 
-	 * String errorMessage; String errorTitle;
-	 * 
-	 * if (e.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) { errorMessage =
-	 * PopUpMessages.LOGIN_FAILED_MESSAGE; errorTitle =
-	 * PopUpMessages.LOGIN_FAILED_TITLE; } else if (e.statusCode ==
-	 * HttpURLConnection.HTTP_INTERNAL_ERROR) { errorMessage =
-	 * PopUpMessages.SERVER_ERROR_MESSAGE; errorTitle =
-	 * PopUpMessages.SERVER_ERROR_TITLE; } else { errorMessage =
-	 * "An unexpected error has occurred. Please contact customer service if it persists."
-	 * ; errorTitle = "Error"; }
-	 * 
-	 * Platform.runLater(() -> ApiCallErrorPopUp.showErrorPopUp(primaryStage,
-	 * errorMessage, errorTitle));
-	 * 
-	 * } catch (Exception e) { Platform.runLater(() ->
-	 * ApiCallErrorPopUp.showErrorPopUp(primaryStage,
-	 * "An unexpected error has occurred. Please contact customer service if it persists."
-	 * , "Error")); } }
-	 */
 }

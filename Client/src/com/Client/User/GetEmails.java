@@ -10,8 +10,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import com.google.gson.reflect.TypeToken;
-import com.Client.WeatherCast.WeatherCastController;
-import com.Client.WeatherCast.WeatherCastController.weatherCallException;
 import com.google.gson.Gson;
 
 

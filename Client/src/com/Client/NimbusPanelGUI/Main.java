@@ -3,9 +3,11 @@ package com.Client.NimbusPanelGUI;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import java.util.ArrayList;
+import com.Client.User.User;
 
 public class Main extends Application {
+	
+	public static User currentUser;
     public static String location;
     public static int timeZoneOffset;
     
@@ -27,15 +29,8 @@ public class Main extends Application {
     public static long current_sunset_timestamp;
     public static long current_time_timestamp;
     
-    public static ArrayList<String> favouriteLocations = new ArrayList<>();
-    
     @Override
     public void start(Stage primaryStage) {
-        // Initialize favorite locations in Main instead of HomePage
-        favouriteLocations.add("London");
-        favouriteLocations.add("Bejaia");
-        favouriteLocations.add("Miami");
-        favouriteLocations.add("testestestestest");
         
         // Set up the stage
         Image icon = new Image("file:img/app-logo-32.png");

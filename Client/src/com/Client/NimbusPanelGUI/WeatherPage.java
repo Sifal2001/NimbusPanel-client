@@ -111,7 +111,7 @@ public class WeatherPage {
 		}
 
 		backButton.setOnAction(event -> {
-			HomePage homePage = new HomePage(primaryStage, Main.favouriteLocations);
+			HomePage homePage = new HomePage(primaryStage);
 			primaryStage.setScene(homePage.createScene());
 		});
 

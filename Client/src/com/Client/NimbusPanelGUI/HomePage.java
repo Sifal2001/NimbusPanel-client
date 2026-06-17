@@ -1,8 +1,9 @@
 package com.Client.NimbusPanelGUI;
 
 import com.Client.CoordResponse.Location;
-import com.Client.CoordResponse.Location.ApiException;
-import com.Client.WeatherCast.WeatherCastController.weatherCallException;
+import com.Client.User.AddFavourite;
+import com.Client.User.DeleteFavourite;
+import com.Client.User.FavouriteLocations;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,23 +11,25 @@ import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.stage.*;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
+
 import javafx.concurrent.Task;
 
 public class HomePage {
     private Stage primaryStage;
-    private ArrayList<String> favouriteLocations; 
+    private List<FavouriteLocations> favouriteLocations; 
     
     private static final String CARD_STYLE =
     	    "-fx-background-color: rgba(28, 45, 80, 0.9); -fx-background-radius: 10; "
     	    + "-fx-cursor: hand; -fx-text-fill: white; -fx-font-weight: bold; "
     	    + "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0, 0, 4);";
     
-    public HomePage(Stage primaryStage, ArrayList<String> favouriteLocations) {
+    public HomePage(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.favouriteLocations = favouriteLocations; 
+        this.favouriteLocations = Main.currentUser.getFavouriteLocations() != null
+        		? Main.currentUser.getFavouriteLocations()
+        				: new ArrayList<>();
     }
     
     public Scene createScene() {
@@ -80,7 +83,6 @@ public class HomePage {
         mainLayout.setPrefSize(1200, 680);
         mainLayout.getChildren().addAll(logoSection, createFavouritesHbox());
         
-     // The lambda's only job now: harvest the input, delegate the work
         searchButton.setOnAction(event -> openWeatherPage(nameField.getText()));
         
         return new Scene(mainLayout, 1200, 680);
@@ -109,7 +111,7 @@ public class HomePage {
         favouritesScrollPane.setMaxWidth(1040);
         favouritesScrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent");
         
-        for (String favourite: favouriteLocations) {
+        for (FavouriteLocations favourite: favouriteLocations) {
             createFavouriteButton(favourite, favouriteCardsBox);
         }
         
@@ -117,7 +119,6 @@ public class HomePage {
         favouritesContainer.setMinSize(1040, 220);
         favouritesContainer.setSpacing(12);
         favouritesContainer.setAlignment(Pos.CENTER);
-        //favouritesContainer.setPadding(new Insets(0, 20, 24, 20));
         favouritesContainer.getChildren().addAll(favouritesScrollPane, addFavouriteBox);
         
         addFavouriteButton.setOnAction(event -> {
@@ -127,13 +128,13 @@ public class HomePage {
         return favouritesContainer;
     }
     
-    private void createFavouriteButton(String favourite, HBox favouriteCardsBox) {
+    private void createFavouriteButton(FavouriteLocations favourite, HBox favouriteCardsBox) {
         Image deleteIcon = new Image("file:img/delete-icon.png");
         ImageView deleteIconView = new ImageView(deleteIcon);
         deleteIconView.setFitHeight(24);
         deleteIconView.setFitWidth(24);
         
-        Button favouriteButton = new Button(favourite);
+        Button favouriteButton = new Button(favourite.getLocation());
         favouriteButton.setPrefWidth(160);
         favouriteButton.setPrefHeight(180);
         favouriteButton.setMaxHeight(220);
@@ -153,7 +154,7 @@ public class HomePage {
         
         favouriteCardsBox.getChildren().add(stackPane);
         
-        favouriteButton.setOnAction(event -> openWeatherPage(favouriteButton.getText()));
+        favouriteButton.setOnAction(event -> openWeatherPage(favourite.getLocation()));
         
         deleteFavouriteButton.setOnAction(e -> {
             createDeleteConfirmationPopUp(primaryStage, favourite);
@@ -175,9 +176,38 @@ public class HomePage {
         
         Button addButton = new Button("Add");
         addButton.setOnAction(event -> {
-            favouriteLocations.add(Main.capitalizeFirstLetter(locationTextField.getText()));
-            popupStage.close();
-            primaryStage.setScene(createScene());
+            String locationName = Main.capitalizeFirstLetter(locationTextField.getText());
+
+            if (isDuplicateFavourite(locationName)) {
+                ApiCallErrorPopUp.showErrorPopUp(popupStage,
+                    "This location is already in your favourites.", "Duplicate");
+                return;   
+            }
+
+            Task<FavouriteLocations> addTask = new Task<>() {
+                @Override
+                protected FavouriteLocations call() throws Exception {
+
+                    return AddFavourite.addFavourite(Main.currentUser.getId(), locationName);
+                }
+            };
+
+            addTask.setOnSucceeded(e -> {
+                FavouriteLocations saved = addTask.getValue();
+                favouriteLocations.add(saved);
+
+                popupStage.close();
+                primaryStage.setScene(createScene());   
+            });
+
+            addTask.setOnFailed(e -> {
+                Throwable cause = addTask.getException();
+                if (cause != null) cause.printStackTrace();
+                ApiCallErrorPopUp.showErrorPopUp(popupStage,
+                    "Could not add favourite. Please try again.", "Error");
+            });
+
+            new Thread(addTask).start();
         });
         
         HBox popupButtons = new HBox(closeButton, addButton);
@@ -194,23 +224,42 @@ public class HomePage {
         popupStage.show();
     }
     
-    private void createDeleteConfirmationPopUp(Stage ownerStage, String favouriteLocation) {
+    private void createDeleteConfirmationPopUp(Stage ownerStage, FavouriteLocations favourite) {
         Stage popupStage = new Stage();
         Image icon = new Image("file:img/minus-button-16.png");
         popupStage.getIcons().add(icon);
         popupStage.initModality(Modality.WINDOW_MODAL);
         popupStage.initOwner(ownerStage);
         
-        Label label = new Label("Are you sure You want to remove " + favouriteLocation + " from you favourites?");
+        Label label = new Label("Are you sure You want to remove " + favourite.getLocation() + " from you favourites?");
         
         Button closeButton = new Button("Close");
         closeButton.setOnAction(event -> popupStage.close());
         
         Button confirmButton = new Button("Confirm");
         confirmButton.setOnAction(event -> {
-            removeItemFromFavourites(favouriteLocation);
-            popupStage.close();
-            primaryStage.setScene(createScene());
+        	Task<Void> deleteTask = new Task<>() {
+        		@Override 
+        		protected Void call() throws Exception{
+        			DeleteFavourite.deleteFavourite(Main.currentUser.getId(), favourite.getId());
+        			return null;
+        		}
+        	};
+        	
+        	deleteTask.setOnSucceeded(e -> {
+        		removeItemFromFavourites(favourite);
+        		popupStage.close();
+        		primaryStage.setScene(createScene());
+        	});
+        	
+        	deleteTask.setOnFailed(e -> {
+        		Throwable cause = deleteTask.getException();
+        		if (cause != null) cause.printStackTrace();
+        		ApiCallErrorPopUp.showErrorPopUp(popupStage, 
+        				"Could not remove favourite. Please try again.", "Error");  
+    		});
+        	
+        	new Thread(deleteTask).start();
         });
         
         HBox popupButtons = new HBox(closeButton, confirmButton);
@@ -227,49 +276,30 @@ public class HomePage {
         popupStage.show();
     }
     
-    private void removeItemFromFavourites(String itemToRemove) {
-        favouriteLocations.removeIf(city -> city.equals(itemToRemove));
+    private void removeItemFromFavourites(FavouriteLocations favourite) {
+        favouriteLocations.removeIf(f -> f.getId().equals(favourite.getId()));
     }
     
     private void openWeatherPage(String cityName) {
-        // Prepare the location name on the UI thread — this part is instant,
-        // no network, so it's fine to do here before going background
         Main.location = Main.capitalizeFirstLetter(cityName);
 
-        // A Task<Void> is a unit of background work. <Void> is the generic type
-        // saying "this task doesn't RETURN a value" — it just does work (the
-        // navigation happens in the success hook, not as a return value).
-        // We build it from an anonymous class: 'new Task<Void>() { ... }' creates
-        // a one-off object that overrides call() with what we want done
         Task<Void> loadWeatherTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                // THIS runs on a BACKGROUND thread — the slow network call lives
-                // here, off the UI thread, so the window stays responsive.
-                // If GetLocation throws, the Task catches it automatically and
-                // routes it to setOnFailed below — no try/catch needed here
+
                 Location.GetLocation(new String[]{}, Main.formatLocationInput(Main.location));
-                return null;   // Void's required "I return nothing" return
+                return null;  
             }
         };
 
-        // setOnSucceeded runs AUTOMATICALLY and ON THE UI THREAD when call()
-        // finishes without throwing. So touching the scene here is legal —
-        // this is the safe "hand back to the UI thread" half of the dance.
-        // 'event ->' is a lambda; the event param is unused but required by the signature
         loadWeatherTask.setOnSucceeded(event -> {
             WeatherPage weatherPage = new WeatherPage(primaryStage);
             primaryStage.setScene(weatherPage.createScene());
         });
 
-        // setOnFailed runs (also on the UI thread) if call() threw anything.
-        // getException() returns the Throwable that was thrown — useful if you
-        // later want to show different popups for different failures
         loadWeatherTask.setOnFailed(event -> {
         	Throwable cause = loadWeatherTask.getException();
-            // For now both paths show the same popup, but this structure lets you
-            // give a real "server is down" message later instead of blaming the city.
-            // printStackTrace keeps the technical detail in your console for debugging
+
             if (cause != null) {
                 cause.printStackTrace();
             }
@@ -278,10 +308,11 @@ public class HomePage {
                 PopUpMessages.LOCATION_NOT_FOUND_TITLE);
         });
 
-        // Nothing has run yet — we only DEFINED the task and its hooks.
-        // A Thread is the actual worker; we hand it the task and start() it.
-        // 'new Thread(task)' wraps the work, start() launches it in the background
-        // and immediately returns control here, so the UI thread flows on, free
         new Thread(loadWeatherTask).start();
+    }
+    
+    private boolean isDuplicateFavourite(String locationName) {
+    	return favouriteLocations.stream()
+    			.anyMatch(fav -> fav.getLocation().equals(locationName));
     }
 }
