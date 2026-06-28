@@ -214,5 +214,12 @@ public class DailyCast {
 				+ ", rain=" + rain + ", uvi=" + uvi + "]";
 	}
 	
+	public String getDescription() {
+	    if (weather == null || weather.isEmpty()) {
+	        return "";
+	    }
+	    return weather.get(0).getMain();
+	}
+	
 }
 

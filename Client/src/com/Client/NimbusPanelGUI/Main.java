@@ -1,6 +1,7 @@
 package com.Client.NimbusPanelGUI;
 
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import com.Client.User.User;
@@ -11,36 +12,12 @@ public class Main extends Application {
     public static String location;
     public static int timeZoneOffset;
     
-    // Weather data static variables
-    public static double[] hourly_temp = new double[24];
-    public static String[] hourly_description = new String[24];
-    public static double[] daily_temp = new double[6];
-    public static long[] hours = new long[24];
-    public static long[] days = new long[6];
-    public static double[] daily_humidity = new double[6];
-    public static String[] daily_description = new String[6];
-    public static long current_time;
-    public static String current_description;
-    public static double current_temp;
-    public static int current_humidity;
-    public static double current_feelslike;
-    public static double current_windspeed;
-    public static long current_sunrise_timestamp;
-    public static long current_sunset_timestamp;
-    public static long current_time_timestamp;
-    
     @Override
     public void start(Stage primaryStage) {
-        
-        // Set up the stage
+    	primaryStage.setResizable(false);
+    	
         Image icon = new Image("file:img/app-logo-32.png");
         primaryStage.getIcons().add(icon);
-        
-        // Create HomePage instance and set its scene
-//        HomePage homePage = new HomePage(primaryStage, favouriteLocations);
-//        primaryStage.setScene(homePage.createScene());
-//        primaryStage.setTitle("NimbusPanel");
-//        primaryStage.show();
         
         LoginPage loginPage = new LoginPage(primaryStage);
         primaryStage.setScene(loginPage.createScene());
@@ -48,6 +25,12 @@ public class Main extends Application {
         primaryStage.setMinWidth(900);   
         primaryStage.setMinHeight(700); 
         primaryStage.show();
+        
+    }
+    
+    public static Scene styled(Scene scene) {
+    	scene.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
+        return scene;
     }
     
     public static String capitalizeFirstLetter(String city) {
@@ -58,7 +41,7 @@ public class Main extends Application {
     }
     
     public static String formatLocationInput(String location) {
-        return location.replaceAll(" ", "&");
+        return java.net.URLEncoder.encode(location, java.nio.charset.StandardCharsets.UTF_8);
     }
     
     public static void main(String[] args) {

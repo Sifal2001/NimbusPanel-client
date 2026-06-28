@@ -1,5 +1,6 @@
 package com.Client.NimbusPanelGUI;
 
+import com.Client.WeatherCast.WeatherCast;
 import com.Client.CoordResponse.Location;
 import com.Client.User.AddFavourite;
 import com.Client.User.DeleteFavourite;
@@ -21,9 +22,10 @@ public class HomePage {
     private List<FavouriteLocations> favouriteLocations; 
     
     private static final String CARD_STYLE =
-    	    "-fx-background-color: rgba(28, 45, 80, 0.9); -fx-background-radius: 10; "
-    	    + "-fx-cursor: hand; -fx-text-fill: white; -fx-font-weight: bold; "
-    	    + "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0, 0, 4);";
+    		"-fx-background-color: #eaf1f8;" + "-fx-background-radius: 12; "
+    		+ "-fx-border-radius: 16; -fx-font-family: 'Outfit Medium';"
+    	    + "-fx-cursor: hand; -fx-text-fill: #16395f;"
+    	    + "-fx-font-size: 20; -fx-font-weight: bold;";
     
     public HomePage(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -57,16 +59,16 @@ public class HomePage {
         nameField.setStyle("-fx-font-size: 16px");
         nameField.setPrefSize(480, 42);
         
-        Image landingBackgroundImg = new Image("file:img/bg.jpg");
-        
-        BackgroundImage landingBgImage = new BackgroundImage(
-            landingBackgroundImg,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.CENTER,
-            new BackgroundSize(100, 100, true, true, false, true)
-        );
-        Background landingBackground = new Background(landingBgImage);
+//        Image landingBackgroundImg = new Image("file:img/bg.jpg");
+//        
+//        BackgroundImage landingBgImage = new BackgroundImage(
+//            landingBackgroundImg,
+//            BackgroundRepeat.NO_REPEAT,
+//            BackgroundRepeat.NO_REPEAT,
+//            BackgroundPosition.CENTER,
+//            new BackgroundSize(100, 100, true, true, false, true)
+//        );
+//        Background landingBackground = new Background(landingBgImage);
         
         HBox searchBox = new HBox(-46);
         searchBox.getChildren().addAll(nameField, searchButton);
@@ -78,36 +80,42 @@ public class HomePage {
         logoSection.getChildren().addAll(appLogoView, searchBox);
         logoSection.setAlignment(Pos.TOP_CENTER);
         
+        VBox spacer = new VBox();
+        spacer.setPrefSize(20, 1200);
+        
         VBox mainLayout = new VBox();
-        mainLayout.setBackground(landingBackground);
-        mainLayout.setPrefSize(1200, 680);
-        mainLayout.getChildren().addAll(logoSection, createFavouritesHbox());
+        //mainLayout.setBackground(landingBackground);
+        mainLayout.setPrefSize(1200, 660);
+        mainLayout.setStyle("-fx-background-color: " + "linear-gradient(to left, #133454 0%, #15385a 85%, #15395b 100%);");
+        mainLayout.getChildren().addAll(logoSection, spacer ,createFavouritesHbox());
         
         searchButton.setOnAction(event -> openWeatherPage(nameField.getText()));
         
-        return new Scene(mainLayout, 1200, 680);
+        return Main.styled(new Scene(mainLayout, 1200, 660));
     }
     
     private HBox createFavouritesHbox() {
         Button addFavouriteButton = new Button("+");
-        addFavouriteButton.setMinWidth(140);
-        addFavouriteButton.setMaxHeight(220);
-        addFavouriteButton.setStyle(CARD_STYLE + "-fx-font-size: 40px;");
+        addFavouriteButton.setMinWidth(80);
+        addFavouriteButton.setMaxHeight(100);
+        addFavouriteButton.setStyle(CARD_STYLE + "-fx-font-size: 28px;" + "-fx-background-color: transparent;" 
+											   + "-fx-border-color: #d6e3f0;" + "-fx-text-fill: #d6e3f0;" );
         
         HBox addFavouriteBox = new HBox();
-        addFavouriteBox.setPrefSize(140, 220);
+        addFavouriteBox.setPrefSize(180, 140);
+        addFavouriteBox.setAlignment(Pos.TOP_RIGHT);
         addFavouriteBox.getChildren().add(addFavouriteButton);
         
         HBox favouriteCardsBox = new HBox();
-        favouriteCardsBox.setPrefSize(1200, 220);
-        favouriteCardsBox.setSpacing(16);
+        favouriteCardsBox.setPrefSize(1200, 100);
+        favouriteCardsBox.setSpacing(12);
         
         ScrollPane favouritesScrollPane = new ScrollPane();
         favouritesScrollPane.setContent(favouriteCardsBox);
-        favouritesScrollPane.setFitToWidth(true);
-        favouritesScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        favouritesScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        favouritesScrollPane.setMaxHeight(230);
+        //favouritesScrollPane.setFitToWidth(true);
+        favouritesScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        favouritesScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        favouritesScrollPane.setMaxHeight(140);
         favouritesScrollPane.setMaxWidth(1040);
         favouritesScrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent");
         
@@ -116,9 +124,10 @@ public class HomePage {
         }
         
         HBox favouritesContainer = new HBox();
-        favouritesContainer.setMinSize(1040, 220);
+        favouritesContainer.setMinSize(1040, 140);
         favouritesContainer.setSpacing(12);
-        favouritesContainer.setAlignment(Pos.CENTER);
+        favouritesContainer.setPadding(new Insets(0,12,0,12));
+        favouritesContainer.setAlignment(Pos.TOP_CENTER);
         favouritesContainer.getChildren().addAll(favouritesScrollPane, addFavouriteBox);
         
         addFavouriteButton.setOnAction(event -> {
@@ -141,7 +150,7 @@ public class HomePage {
         favouriteButton.setWrapText(true);
         favouriteButton.setAlignment(Pos.CENTER);
         favouriteButton.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-        favouriteButton.setStyle(CARD_STYLE + "-fx-font-size: 28px;");
+        favouriteButton.setStyle(CARD_STYLE);
         
         Button deleteFavouriteButton = new Button();
         deleteFavouriteButton.setGraphic(deleteIconView);
@@ -283,17 +292,17 @@ public class HomePage {
     private void openWeatherPage(String cityName) {
         Main.location = Main.capitalizeFirstLetter(cityName);
 
-        Task<Void> loadWeatherTask = new Task<>() {
+        Task<WeatherCast> loadWeatherTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected WeatherCast call() throws Exception {
+                return Location.GetLocation(new String[]{}, Main.formatLocationInput(Main.location));
 
-                Location.GetLocation(new String[]{}, Main.formatLocationInput(Main.location));
-                return null;  
             }
         };
 
         loadWeatherTask.setOnSucceeded(event -> {
-            WeatherPage weatherPage = new WeatherPage(primaryStage);
+        	WeatherCast weatherCast = loadWeatherTask.getValue();
+            WeatherPage weatherPage = new WeatherPage(primaryStage, weatherCast);
             primaryStage.setScene(weatherPage.createScene());
         });
 

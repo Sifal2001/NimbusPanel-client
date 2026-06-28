@@ -173,5 +173,10 @@ public class CurrentCast {
 	}
 	
 	
-	
+	public String getDescription() {
+	    if (weather == null || weather.isEmpty()) {
+	        return "";
+	    }
+	    return weather.get(0).getMain();
+	}
 }

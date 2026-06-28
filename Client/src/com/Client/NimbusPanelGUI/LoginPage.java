@@ -45,8 +45,8 @@ public class LoginPage {
 		Background landingBackground = new Background(landingBgImage);
 
 		HBox mainLayout = new HBox();
-		mainLayout.setPrefSize(1200, 680);
-		mainLayout.setMinSize(900, 600);
+		mainLayout.setMaxSize(1200, 660);
+		mainLayout.setMinSize(900, 660);
 
 		VBox loginContent = new VBox(20);
 		loginContent.setAlignment(Pos.TOP_CENTER);
@@ -67,8 +67,8 @@ public class LoginPage {
 		headerSection.setPrefWidth(400);
 
 		Label welcomeLabel = new Label("Welcome to NimbusPanel");
-		welcomeLabel.setStyle(
-				"-fx-font-family: 'Arial'; -fx-font-size: 32px; -fx-text-fill: Black; -fx-font-weight: bold; -fx-wrap-text: true;");
+		welcomeLabel
+				.setStyle(" -fx-font-size: 32px; -fx-text-fill: Black; -fx-font-weight: bold; -fx-wrap-text: true;");
 		welcomeLabel.setWrapText(true);
 		welcomeContainer.getChildren().add(welcomeLabel);
 
@@ -79,8 +79,7 @@ public class LoginPage {
 
 		Label startLabel = new Label(
 				"Clouds, sun, rain — all at your fingertips. Log in and stay ahead of the weather");
-		startLabel
-				.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 20px; -fx-text-fill: Black; -fx-wrap-text: true;");
+		startLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: Black; -fx-wrap-text: true;");
 		startLabel.setWrapText(true);
 		startContainer.getChildren().add(startLabel);
 
@@ -91,12 +90,10 @@ public class LoginPage {
 
 		emailField = new TextField();
 		emailField.setPromptText("JohnDoe@email.com");
-		emailField.setText("sifyak@gmail.com");
 		VBox emailContainer = UiComponents.createFormField("Email", emailField, 400);
 
 		passwordField = new PasswordField();
 		passwordField.setPromptText("********");
-		passwordField.setText("newnewnew11");
 		VBox passwordContainer = UiComponents.createFormField("Password", passwordField, 400);
 
 		formSection.getChildren().addAll(emailContainer, passwordContainer);
@@ -121,7 +118,7 @@ public class LoginPage {
 		leftLine.setStrokeWidth(1);
 
 		Label orLabel = new Label("OR");
-		orLabel.setStyle("-fx-font-family: 'Arial'; -fx-font-size: 14px; -fx-text-fill: rgba(0, 0, 0, 0.5);");
+		orLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: rgba(0, 0, 0, 0.5);");
 
 		Line rightLine = new Line();
 		rightLine.setStartX(0);
@@ -166,7 +163,7 @@ public class LoginPage {
 
 		mainLayout.getChildren().addAll(loginContent, logoSection);
 
-		return new Scene(mainLayout, 1200, 680);
+		return Main.styled(new Scene(mainLayout, 1200, 660));
 	}
 
 	private void handleLogin() {
